@@ -50,7 +50,28 @@ func GetShift(w http.ResponseWriter, r *http.Request) {
 	// Get the {shiftID} of the url.
 	shiftID := chi.URLParam(r, "shiftID")
 
-	render.JSON(w, r, shiftID)
+	rows, err := db.Query("SELECT s.id, s.start, s.finish, TIMESTAMPDIFF(MINUTE, s.start, s.finish) / 60 AS total FROM shifts AS s WHERE s.id = ?", shiftID)
+	defer rows.Close()
+
+	if err != nil {
+		// This is bad. SQL is bad.
+		panic(err.Error)
+	}
+
+	if rows.Next() {
+		// Get the first shift from the rows.
+		shift, err := ScanShift(rows)
+
+		if err != nil {
+			panic(err)
+		}
+
+		// Output the shift.
+		render.JSON(w, r, shift)
+	} else {
+		// Nothing was found.
+		http.Error(w, "", http.StatusNotFound)
+	}
 }
 
 // DeleteShift removes a shift from the database.
@@ -110,10 +131,9 @@ func GetAllShifts(w http.ResponseWriter, r *http.Request) {
 
 	// put all the shifts into an array.
 	var shifts []Shift
-	for rows.Next() {
-		shift := Shift{}
 
-		err = rows.Scan(&shift.ID, &shift.Start, &shift.Finish, &shift.Total)
+	for rows.Next() {
+		shift, err := ScanShift(rows)
 
 		if err != nil {
 			panic(err)
@@ -121,7 +141,19 @@ func GetAllShifts(w http.ResponseWriter, r *http.Request) {
 
 		shifts = append(shifts, shift)
 	}
+	// There where no results, return 204.
+	if len(shifts) == 0 {
+		http.Error(w, "", http.StatusNoContent)
+	} else {
+		// Dump that array to the client.
+		render.JSON(w, r, shifts)
+	}
+}
 
-	// Dump that array to the client.
-	render.JSON(w, r, shifts)
+// ScanShift scan a shift from a database row.
+func ScanShift(rows *sql.Rows) (Shift, error) {
+	shift := Shift{}
+	err := rows.Scan(&shift.ID, &shift.Start, &shift.Finish, &shift.Total)
+
+	return shift, err
 }
