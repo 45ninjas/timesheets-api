@@ -1,17 +1,20 @@
-package timesheets
+package shifts
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
 	"net/http"
 	"time"
+	"timesheets/internal/apierror"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/render"
 )
 
 var (
-	db *sql.DB
+	db     *sql.DB
+	apiErr apierror.APIError
 )
 
 // Shift stores details about a shift.
@@ -25,6 +28,8 @@ type Shift struct {
 // Init initializes.
 func Init(dbc *sql.DB) {
 	db = dbc
+
+	apiErr = apierror.APIError{"Shift", "", "docs/endpoints/shifts"}
 }
 
 // Routes retruns all the routes for this module.
@@ -68,6 +73,27 @@ func CreateShift(w http.ResponseWriter, r *http.Request) {
 func UpdateShift(w http.ResponseWriter, r *http.Request) {
 	// Get the {shiftID} of the url.
 	shiftID := chi.URLParam(r, "shiftID")
+
+	stmt, err := db.Prepare("UPDATE shifts SET start=?, finish=? WHERE id=?")
+	defer stmt.Close()
+
+	if err != nil {
+		log.Fatalf("Error updating a shift, %s", err.Error())
+	}
+
+	// Decode the json in the request's body.
+	decoder := json.NewDecoder(r.Body)
+	var shift Shift
+	err = decoder.Decode(&shift)
+
+	// TODO: Send this error message back to the end-user.
+	// apiErr.Message = "Unable to parse your json"
+	apierror.IfErr(err, apiErr, w, r)
+
+	// TODO: Make sure the shiftID exists.
+
+	// Execute the database query.
+	stmt.Exec(shift.Start, shift.Finish, shiftID)
 
 	render.JSON(w, r, shiftID)
 }

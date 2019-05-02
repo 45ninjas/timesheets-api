@@ -4,12 +4,11 @@ import (
 	"database/sql"
 	"log"
 	"net/http"
-	"timesheets/timesheets"
-
-	"github.com/go-chi/render"
+	"timesheets/internal/shifts"
 
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
+	"github.com/go-chi/render"
 	_ "github.com/go-sql-driver/mysql"
 )
 
@@ -25,7 +24,7 @@ func Routes() *chi.Mux {
 	)
 
 	router.Route("/api/v1", func(r chi.Router) {
-		r.Mount("/shifts", timesheets.Routes())
+		r.Mount("/shifts", shifts.Routes())
 	})
 
 	return router
@@ -48,7 +47,7 @@ func main() {
 
 	log.Print("Connected to the database successfully")
 
-	timesheets.Init(db)
+	shifts.Init(db)
 
 	// Setup the http API.
 	router := Routes()
