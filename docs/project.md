@@ -3,10 +3,10 @@ The timesheets project is designed to help freelancers track, automate and revie
 Timesheets is split up into multiple parts.
 
 - **API**
-    The interaction for the website and the database. This is 100% independant of the website.
+    The interaction for the website and the database. This is 100% independent of the website.
 
 - **Website**
-    The website should be extremly simple and can behave like a mobile app if viewed on a mobile device. Because the API is independant of the website it can be a single-page site. It does not have to, but it can.
+    The website should be extremely simple and can behave like a mobile app if viewed on a mobile device. Because the API is independent of the website it can be a single-page site. It does not have to, but it can.
     the website can also be a portal for employers to view hours.
 
 - **App**
@@ -42,7 +42,7 @@ Shifts can `GET`, `POST`, `DELETE` and `UPDATE`.
 
 `/v1/days/{date}`
 
-A day shows all the shifts that started on the provied date.
+A day shows all the shifts that started on the provide date.
 
 Days can only `GET`
 
@@ -75,10 +75,10 @@ For example, if the frame is *month* the index will range from 1-12.
 There are a few features that would be nice to add later on. However they are not important and don't have to be enabled/created for the project to work.
 
 ### Comments/tasks/category.
-Sometimes you need to know what you had done during that shift. A seperate table could contain comments so not EVERY shift has a comment. You could also use existing comments for multiple shifts.
+Sometimes you need to know what you had done during that shift. A separate table could contain comments so not EVERY shift has a comment. You could also use existing comments for multiple shifts.
 
 ### Employers/clients
 Same as comments, we can add a table that stores employers. We can assign each shift to an employer.
 
-### Sceduled submissions
+### Scheduled submissions
 Each *employer* can be sent an email or pdf summary of the last *frame*.
